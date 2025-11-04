@@ -25,6 +25,7 @@ export const useRFStore = create<RFState>((set, get) => ({
           type: "sticky",
           position: pos,
           data: { text: `Node ${s.nextId}` },
+          style: { width: 180, height: 120 }, // <= add this
         },
       ],
       nextId: s.nextId + 1,
