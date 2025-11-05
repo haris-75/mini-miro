@@ -62,10 +62,18 @@ export default function ShapeNode({
         keepAspectRatio={isCircle || isDiamond}
         onResizeEnd={onResizeEnd}
       />
-
-      <Handle type="target" position={Position.Left} id="in" />
-      <Handle type="source" position={Position.Right} id="out" />
-
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="in"
+        style={{ left: -6, zIndex: 3 }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="out"
+        style={{ right: -6, zIndex: 3 }}
+      />
       <div
         style={{
           width: "100%",
@@ -76,6 +84,7 @@ export default function ShapeNode({
           transform: isDiamond ? "rotate(45deg)" : "none",
           transformOrigin: "center",
           aspectRatio: isCircle || isDiamond ? "1 / 1" : "auto",
+          pointerEvents: "none",
         }}
       />
     </div>

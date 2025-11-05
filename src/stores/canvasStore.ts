@@ -77,7 +77,7 @@ export const useRFStore = create<RFState>((set, get) => ({
               strokeWidth: o.strokeWidth,
             },
             style: {
-              width: 160,
+              width: o.kind === "rectangle" ? 160 : 120,
               height: 120,
               border: "none",
               padding: 0,
