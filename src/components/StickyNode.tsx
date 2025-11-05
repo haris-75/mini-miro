@@ -1,11 +1,4 @@
-// StickyNoteNode.tsx — replace the editable block + add local state
-import {
-  useRef,
-  useCallback,
-  useState,
-  useEffect,
-  useLayoutEffect,
-} from "react";
+import { useRef, useCallback, useLayoutEffect } from "react";
 import { Handle, Position, useUpdateNodeInternals } from "reactflow";
 import { NodeResizer } from "@reactflow/node-resizer";
 import { useRFStore } from "../stores/canvasStore";
@@ -27,21 +20,6 @@ export default function StickyNode({
   const setNodes = useRFStore((s) => s.setNodes);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
-  // local text to avoid re-rendering on each keystroke
-  const [localText, setLocalText] = useState(data.text);
-  useEffect(() => setLocalText(data.text), [id]); // reset if node identity changes
-
-  const saveText = useCallback(
-    (next: string) => {
-      setNodes((nds) =>
-        nds.map((n) =>
-          n.id === id ? { ...n, data: { ...n.data, text: next } } : n
-        )
-      );
-    },
-    [id, setNodes]
-  );
-
   const onResizeEnd = useCallback(() => {
     const el = boxRef.current;
     if (!el) return;
@@ -57,11 +35,10 @@ export default function StickyNode({
 
   const textRef = useRef<HTMLDivElement | null>(null);
 
-  // initialize or sync text when node changes, but never while typing
   useLayoutEffect(() => {
     const el = textRef.current;
     if (!el) return;
-    if (document.activeElement === el) return; // do not stomp caret
+    if (document.activeElement === el) return;
     el.textContent = data.text ?? "";
   }, [id, data.text]);
 
@@ -107,8 +84,8 @@ export default function StickyNode({
           lineHeight: 1.25,
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
-          flex: 1, // fill vertical space
-          minHeight: 0, // allow shrink on resize
+          flex: 1,
+          minHeight: 0,
           overflow: "auto",
         }}
         onPointerDown={(e) => e.stopPropagation()}

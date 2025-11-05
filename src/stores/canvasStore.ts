@@ -12,7 +12,7 @@ type RFState = {
   setEdges: (updater: (eds: Edge[]) => Edge[]) => void;
 };
 
-export const useRFStore = create<RFState>((set, get) => ({
+export const useRFStore = create<RFState>((set) => ({
   nodes: [],
   edges: [],
   nextId: 1,
@@ -25,7 +25,7 @@ export const useRFStore = create<RFState>((set, get) => ({
           type: "sticky",
           position: pos,
           data: { text: `Node ${s.nextId}` },
-          style: { width: 180, height: 120 }, // <= add this
+          style: { width: 180, height: 120 },
         },
       ],
       nextId: s.nextId + 1,
