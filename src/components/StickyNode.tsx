@@ -67,7 +67,7 @@ export default function StickyNode({
         onResizeEnd={onResizeEnd}
       />
 
-      <Handle type="target" position={Position.Top} />
+      <Handle type="target" position={Position.Left} />
 
       <div
         ref={textRef}
@@ -99,7 +99,7 @@ export default function StickyNode({
         }}
       />
 
-      <Handle type="source" position={Position.Bottom} />
+      <Handle type="source" position={Position.Right} />
     </div>
   );
 }

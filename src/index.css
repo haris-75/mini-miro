@@ -94,3 +94,7 @@ body {
   color: var(--ink);
   border-color: #334155;
 }
+
+.react-flow__node {
+  overflow: visible;
+}
