@@ -18,6 +18,7 @@ export default function StickyNode({
 }: CustomNodeProps<StickyData>) {
   const updateNodeInternals = useUpdateNodeInternals();
   const setNodes = useRFStore((s) => s.setNodes);
+  const showResizers = useRFStore((s) => s.ui.showResizers);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const onResizeEnd = useCallback(() => {
@@ -48,9 +49,8 @@ export default function StickyNode({
       style={{
         width: "100%",
         height: "100%",
-        position: "relative",
-        background: "#554d2fff",
-        borderRadius: 8,
+
+        background: "transparent",
         padding: 10,
         boxShadow: "0 1px 0 rgba(0,0,0,.08)",
         minWidth: 120,
@@ -61,7 +61,7 @@ export default function StickyNode({
       }}
     >
       <NodeResizer
-        isVisible={!!selected}
+        isVisible={!!selected || showResizers}
         minWidth={120}
         minHeight={90}
         onResizeEnd={onResizeEnd}
@@ -87,6 +87,9 @@ export default function StickyNode({
           flex: 1,
           minHeight: 0,
           overflow: "auto",
+          background: "#254444ff",
+          borderRadius: 6,
+          padding: 6,
         }}
         onPointerDown={(e) => e.stopPropagation()}
         onBlur={() => {

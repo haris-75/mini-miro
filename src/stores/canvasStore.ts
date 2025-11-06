@@ -2,8 +2,7 @@ import type { Edge, Node, XYPosition, Connection } from "reactflow";
 import { addEdge, MarkerType } from "reactflow";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-
-type ShapeKind = "rectangle" | "circle" | "diamond";
+import type { ShapeKind } from "../types/canvas";
 
 type RFState = {
   nodes: Node[];
@@ -159,7 +158,7 @@ export const useRFStore = create<RFState>()(
         set((s) => {
           const selected = s.nodes.filter((n) => n.selected);
           if (selected.length === 0) return {};
-          // compute bounds
+
           const minX = Math.min(...selected.map((n) => n.position.x));
           const minY = Math.min(...selected.map((n) => n.position.y));
           const maxX = Math.max(
@@ -172,10 +171,13 @@ export const useRFStore = create<RFState>()(
               (n) => n.position.y + (Number(n.style?.height) || 120)
             )
           );
+
           const pad = 24;
-          const frame = {
-            id: String(s.nextId),
-            type: "group" as const,
+          const frameId = String(s.nextId);
+
+          const frame: Node = {
+            id: frameId,
+            type: "group",
             position: { x: minX - pad, y: minY - pad },
             data: {},
             style: {
@@ -185,22 +187,28 @@ export const useRFStore = create<RFState>()(
               background: "transparent",
             },
           };
-          const children = s.nodes.map((n) => {
-            if (!n.selected) return n;
-            return {
-              ...n,
-              parentNode: frame.id,
-              extent: "parent",
-              position: {
-                x: n.position.x - frame.position.x,
-                y: n.position.y - frame.position.y,
-              },
-              // keep absolute for rendering
-              positionAbsolute: undefined,
-            };
+
+          const intoGroup = (
+            n: Node,
+            parentPos: XYPosition,
+            parentId: string
+          ): Node => ({
+            ...n,
+            parentNode: parentId,
+            extent: "parent",
+            position: {
+              x: n.position.x - parentPos.x,
+              y: n.position.y - parentPos.y,
+            },
+            positionAbsolute: undefined,
           });
+
+          const children: Node[] = s.nodes.map((n) =>
+            n.selected ? intoGroup(n, frame.position, frame.id) : n
+          );
+
           return {
-            nodes: [...children, frame as Node],
+            nodes: [...children, frame],
             nextId: s.nextId + 1,
           };
         }),

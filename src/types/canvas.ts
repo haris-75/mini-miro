@@ -31,3 +31,6 @@ export const NODE_TYPES: NodeTypes = {
 };
 
 export const EDGE_TYPES: EdgeTypes = { straight: StraightEdge };
+
+export type ShapeKind = "rectangle" | "circle" | "diamond";
+export type EdgeType = "straight" | "step" | "smoothstep";

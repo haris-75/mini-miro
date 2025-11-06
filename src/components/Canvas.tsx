@@ -13,6 +13,7 @@ import ShapeNode from "./ShapeNode";
 import TextNode from "./TextNode";
 import GroupNode from "./GroupNode";
 import { useEffect } from "react";
+import { isEdgeType, isShapeKind } from "../utils";
 const nodeTypes = {
   sticky: StickyNode,
   shape: ShapeNode,
@@ -93,7 +94,10 @@ function Board() {
         <button onClick={groupSelectionIntoFrame}>Group Selection</button>
         <select
           value={shapeOpts.kind}
-          onChange={(e) => setShapeOpts({ kind: e.target.value as any })}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (isShapeKind(v)) setShapeOpts({ kind: v });
+          }}
           title="Shape"
         >
           <option value="rectangle">Rectangle</option>
@@ -125,7 +129,10 @@ function Board() {
         />
         <select
           value={edgeOpts.type}
-          onChange={(e) => setEdgeOpts({ type: e.target.value as any })}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (isEdgeType(v)) setEdgeOpts({ type: v });
+          }}
           title="Edge style"
         >
           <option value="straight">Straight</option>
