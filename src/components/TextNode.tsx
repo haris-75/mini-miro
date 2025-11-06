@@ -8,6 +8,7 @@ type P = { id: string; data: TextData; selected?: boolean };
 
 export default function TextNode({ id, data, selected }: P) {
   const setNodes = useRFStore((s) => s.setNodes);
+  const showResizers = useRFStore((s) => s.ui.showResizers);
   const divRef = useRef(null);
 
   const onInput = useCallback(() => {
@@ -19,7 +20,11 @@ export default function TextNode({ id, data, selected }: P) {
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
-      <NodeResizer isVisible={!!selected} minWidth={80} minHeight={40} />
+      <NodeResizer
+        isVisible={!!selected || showResizers}
+        minWidth={80}
+        minHeight={40}
+      />
       <div
         ref={divRef}
         contentEditable

@@ -21,6 +21,8 @@ export default function ShapeNode({
   const boxRef = useRef<HTMLDivElement | null>(null);
   const updateNodeInternals = useUpdateNodeInternals();
   const setNodes = useRFStore((s) => s.setNodes);
+  const showResizers = useRFStore((s) => s.ui.showResizers);
+  const allowStretch = useRFStore((s) => s.ui.allowStretch);
 
   const onResizeEnd = useCallback(() => {
     const el = boxRef.current;
@@ -56,10 +58,10 @@ export default function ShapeNode({
       }}
     >
       <NodeResizer
-        isVisible={!!selected}
+        isVisible={!!selected || showResizers}
         minWidth={80}
         minHeight={80}
-        keepAspectRatio={isCircle || isDiamond}
+        keepAspectRatio={(isCircle || isDiamond) && !allowStretch}
         onResizeEnd={onResizeEnd}
       />
       <Handle

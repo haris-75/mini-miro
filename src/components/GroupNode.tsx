@@ -1,9 +1,11 @@
 import { NodeResizer } from "@reactflow/node-resizer";
 import "@reactflow/node-resizer/dist/style.css";
+import { useRFStore } from "../stores/canvasStore";
 
 type P = { selected?: boolean };
 
 export default function GroupNode({ selected }: P) {
+  const showResizers = useRFStore((s) => s.ui.showResizers);
   return (
     <div
       style={{
@@ -15,7 +17,11 @@ export default function GroupNode({ selected }: P) {
         borderRadius: 12,
       }}
     >
-      <NodeResizer isVisible={!!selected} minWidth={160} minHeight={120} />
+      <NodeResizer
+        isVisible={!!selected || showResizers}
+        minWidth={160}
+        minHeight={120}
+      />
     </div>
   );
 }

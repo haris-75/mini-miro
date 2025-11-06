@@ -37,6 +37,8 @@ function Board() {
     shapeOpts,
     setShapeOpts,
     deleteSelected,
+    ui,
+    setUI,
   } = useRFStore();
   const rf = useReactFlow();
 
@@ -153,6 +155,22 @@ function Board() {
           onChange={(e) => setEdgeOpts({ label: e.target.value })}
           style={{ width: 160 }}
         />
+        <label>
+          <input
+            type="checkbox"
+            checked={ui.showResizers}
+            onChange={(e) => setUI({ showResizers: e.target.checked })}
+          />
+          Show resize handles
+        </label>
+        <label title="Allow non-proportional resize for circle/diamond">
+          <input
+            type="checkbox"
+            checked={ui.allowStretch}
+            onChange={(e) => setUI({ allowStretch: e.target.checked })}
+          />
+          Allow stretch
+        </label>
       </div>
 
       <ReactFlow

@@ -15,6 +15,8 @@ type RFState = {
   addGroup: (pos: XYPosition) => void;
   groupSelectionIntoFrame: () => void;
   deleteSelected: () => void;
+  ui: { showResizers: boolean; allowStretch: boolean };
+  setUI: (patch: Partial<RFState["ui"]>) => void;
 
   edgeOpts: {
     type: "straight" | "step" | "smoothstep";
@@ -57,6 +59,9 @@ export const useRFStore = create<RFState>()(
       nodes: [],
       edges: [],
       nextId: 1,
+
+      ui: { showResizers: false, allowStretch: false },
+      setUI: (patch) => set((s) => ({ ui: { ...s.ui, ...patch } })),
 
       addNode: (pos) =>
         set((s) => ({
@@ -229,13 +234,13 @@ export const useRFStore = create<RFState>()(
     {
       name: "rf:canvas:v1",
       storage: createJSONStorage(() => localStorage),
-      // persist only serializable state
       partialize: (s) => ({
         nodes: s.nodes,
         edges: s.edges,
         nextId: s.nextId,
         edgeOpts: s.edgeOpts,
         shapeOpts: s.shapeOpts,
+        ui: s.ui,
       }),
     }
   )
