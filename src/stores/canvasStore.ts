@@ -11,6 +11,9 @@ type RFState = {
   nextId: number;
   addNode: (pos: XYPosition) => void;
   addShape: (pos: XYPosition) => void;
+  addText: (pos: XYPosition) => void;
+  addGroup: (pos: XYPosition) => void;
+  groupSelectionIntoFrame: () => void;
 
   edgeOpts: {
     type: "straight" | "step" | "smoothstep";
@@ -88,6 +91,97 @@ export const useRFStore = create<RFState>()(
                 },
               },
             ],
+            nextId: s.nextId + 1,
+          };
+        }),
+
+      addText: (pos) =>
+        set((s) => ({
+          nodes: [
+            ...s.nodes,
+            {
+              id: String(s.nextId),
+              type: "textNode",
+              position: pos,
+              data: { text: "Title" },
+              style: {
+                width: 220,
+                height: 56,
+                background: "transparent",
+                padding: 0,
+              },
+            },
+          ],
+          nextId: s.nextId + 1,
+        })),
+
+      addGroup: (pos) =>
+        set((s) => ({
+          nodes: [
+            ...s.nodes,
+            {
+              id: String(s.nextId),
+              type: "group",
+              position: pos,
+              data: {},
+              // children will use extent:'parent'
+              style: {
+                width: 320,
+                height: 220,
+                padding: 12,
+                background: "transparent",
+              },
+            },
+          ],
+          nextId: s.nextId + 1,
+        })),
+
+      groupSelectionIntoFrame: () =>
+        set((s) => {
+          const selected = s.nodes.filter((n) => n.selected);
+          if (selected.length === 0) return {};
+          // compute bounds
+          const minX = Math.min(...selected.map((n) => n.position.x));
+          const minY = Math.min(...selected.map((n) => n.position.y));
+          const maxX = Math.max(
+            ...selected.map(
+              (n) => n.position.x + (Number(n.style?.width) || 160)
+            )
+          );
+          const maxY = Math.max(
+            ...selected.map(
+              (n) => n.position.y + (Number(n.style?.height) || 120)
+            )
+          );
+          const pad = 24;
+          const frame = {
+            id: String(s.nextId),
+            type: "group" as const,
+            position: { x: minX - pad, y: minY - pad },
+            data: {},
+            style: {
+              width: maxX - minX + pad * 2,
+              height: maxY - minY + pad * 2,
+              padding: 12,
+              background: "transparent",
+            },
+          };
+          const children = s.nodes.map((n) => {
+            if (!n.selected) return n;
+            return {
+              ...n,
+              parentNode: frame.id,
+              extent: "parent",
+              position: {
+                x: n.position.x - frame.position.x,
+                y: n.position.y - frame.position.y,
+              },
+              // keep absolute for rendering
+              positionAbsolute: undefined,
+            };
+          });
+          return {
+            nodes: [...children, frame as Node],
             nextId: s.nextId + 1,
           };
         }),

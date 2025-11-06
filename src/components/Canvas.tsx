@@ -10,13 +10,22 @@ import "reactflow/dist/style.css";
 import { useRFStore } from "../stores/canvasStore";
 import StickyNode from "./StickyNode";
 import ShapeNode from "./ShapeNode";
-
-const nodeTypes = { sticky: StickyNode, shape: ShapeNode };
+import TextNode from "./TextNode";
+import GroupNode from "./GroupNode";
+const nodeTypes = {
+  sticky: StickyNode,
+  shape: ShapeNode,
+  textNode: TextNode,
+  group: GroupNode,
+};
 
 function Board() {
   const {
     addNode,
     addShape,
+    addText,
+    addGroup,
+    groupSelectionIntoFrame,
     nodes,
     edges,
     setNodes,
@@ -37,6 +46,8 @@ function Board() {
 
   const onAddSticky = () => addNode(centerPos());
   const onAddShape = () => addShape(centerPos());
+  const onAddText = () => addText(centerPos());
+  const onAddGroup = () => addGroup(centerPos());
 
   return (
     <>
@@ -51,8 +62,10 @@ function Board() {
         }}
       >
         <button onClick={onAddSticky}>+ Sticky</button>
-        <button onClick={onAddShape}>+ Shape</button>
-
+        <button onClick={onAddShape}>+ Shape</button>+{" "}
+        <button onClick={onAddText}>+ Text</button>+{" "}
+        <button onClick={onAddGroup}>+ Group</button>+{" "}
+        <button onClick={groupSelectionIntoFrame}>Group Selection</button>
         <select
           value={shapeOpts.kind}
           onChange={(e) => setShapeOpts({ kind: e.target.value as any })}
@@ -85,7 +98,6 @@ function Board() {
           title="Stroke width"
           style={{ width: 64 }}
         />
-
         <select
           value={edgeOpts.type}
           onChange={(e) => setEdgeOpts({ type: e.target.value as any })}
@@ -128,6 +140,7 @@ function Board() {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         fitView
+        defaultEdgeOptions={{ interactionWidth: 24 }}
       >
         <Background />
         <Controls />
