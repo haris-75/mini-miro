@@ -14,6 +14,7 @@ type RFState = {
   addText: (pos: XYPosition) => void;
   addGroup: (pos: XYPosition) => void;
   groupSelectionIntoFrame: () => void;
+  deleteSelected: () => void;
 
   edgeOpts: {
     type: "straight" | "step" | "smoothstep";
@@ -39,6 +40,20 @@ type RFState = {
 export const useRFStore = create<RFState>()(
   persist(
     (set, get) => ({
+      deleteSelected: () =>
+        set((s) => {
+          const toDelete = new Set(
+            s.nodes.filter((n) => n.selected).map((n) => n.id)
+          );
+          if (toDelete.size === 0) return {};
+          return {
+            nodes: s.nodes.filter((n) => !toDelete.has(n.id)),
+            edges: s.edges.filter(
+              (e) => !toDelete.has(e.source) && !toDelete.has(e.target)
+            ),
+          };
+        }),
+
       nodes: [],
       edges: [],
       nextId: 1,
@@ -124,7 +139,6 @@ export const useRFStore = create<RFState>()(
               type: "group",
               position: pos,
               data: {},
-              // children will use extent:'parent'
               style: {
                 width: 320,
                 height: 220,

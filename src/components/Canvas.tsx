@@ -12,6 +12,7 @@ import StickyNode from "./StickyNode";
 import ShapeNode from "./ShapeNode";
 import TextNode from "./TextNode";
 import GroupNode from "./GroupNode";
+import { useEffect } from "react";
 const nodeTypes = {
   sticky: StickyNode,
   shape: ShapeNode,
@@ -35,6 +36,7 @@ function Board() {
     setEdgeOpts,
     shapeOpts,
     setShapeOpts,
+    deleteSelected,
   } = useRFStore();
   const rf = useReactFlow();
 
@@ -49,6 +51,26 @@ function Board() {
   const onAddText = () => addText(centerPos());
   const onAddGroup = () => addGroup(centerPos());
 
+  useEffect(() => {
+    const isEditing = () => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return false;
+      const name = el.tagName;
+      if (name === "INPUT" || name === "TEXTAREA") return true;
+      if (el.isContentEditable) return true;
+      return false;
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (isEditing()) return;
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        deleteSelected();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [deleteSelected]);
+
   return (
     <>
       <div
@@ -62,9 +84,10 @@ function Board() {
         }}
       >
         <button onClick={onAddSticky}>+ Sticky</button>
-        <button onClick={onAddShape}>+ Shape</button>+{" "}
-        <button onClick={onAddText}>+ Text</button>+{" "}
-        <button onClick={onAddGroup}>+ Group</button>+{" "}
+        <button onClick={onAddShape}>+ Shape</button>
+        <button onClick={onAddText}>+ Text</button>
+        <button onClick={onAddGroup}>+ Group</button>
+        <button onClick={deleteSelected}>🗑 Delete</button>
         <button onClick={groupSelectionIntoFrame}>Group Selection</button>
         <select
           value={shapeOpts.kind}
