@@ -31,7 +31,7 @@ function Board() {
     addNode,
     addShape,
     addText,
-    addGroup,
+    // addGroup,
     // groupSelectionIntoFrame,
     nodes,
     edges,
@@ -71,10 +71,10 @@ function Board() {
     () => addText(centerPos()),
     [addText, centerPos]
   );
-  const handleAddGroup = useCallback(
-    () => addGroup(centerPos()),
-    [addGroup, centerPos]
-  );
+  // const handleAddGroup = useCallback(
+  //   () => addGroup(centerPos()),
+  //   [addGroup, centerPos]
+  // );
 
   const handleShapeKindChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -219,12 +219,12 @@ function Board() {
             >
               + Text
             </button>
-            <button
+            {/* <button
               onClick={handleAddGroup}
               className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-pink-500 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
             >
               + Group
-            </button>
+            </button> */}
             <button
               onClick={handleDeleteSelected}
               className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
