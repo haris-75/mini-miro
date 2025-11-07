@@ -32,7 +32,7 @@ function Board() {
     addShape,
     addText,
     addGroup,
-    groupSelectionIntoFrame,
+    // groupSelectionIntoFrame,
     nodes,
     edges,
     setNodes,
@@ -47,6 +47,10 @@ function Board() {
     setUI,
   } = useRFStore();
   const rf = useReactFlow();
+  const onFit = useCallback(
+    () => rf.fitView({ padding: 0.15, duration: 300 }),
+    [rf]
+  );
 
   const centerPos = useCallback(() => {
     return rf.screenToFlowPosition({
@@ -140,10 +144,10 @@ function Board() {
     () => deleteSelected(),
     [deleteSelected]
   );
-  const handleGroupSelection = useCallback(
-    () => groupSelectionIntoFrame(),
-    [groupSelectionIntoFrame]
-  );
+  // const handleGroupSelection = useCallback(
+  //   () => groupSelectionIntoFrame(),
+  //   [groupSelectionIntoFrame]
+  // );
 
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) =>
@@ -171,11 +175,19 @@ function Board() {
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
         deleteSelected();
+        return;
+      }
+      if (
+        e.key.toLowerCase() === "f" ||
+        ((e.metaKey || e.ctrlKey) && e.key === "0")
+      ) {
+        e.preventDefault();
+        onFit();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [deleteSelected]);
+  }, [deleteSelected, onFit]);
 
   return (
     <>
@@ -183,6 +195,12 @@ function Board() {
         <div className="flex flex-wrap gap-2">
           {/* Action Buttons */}
           <div className="flex gap-2 pb-2 border-b border-gray-700 w-full">
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-blue-400 to-blue-800 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              onClick={onFit}
+            >
+              Fit View
+            </button>
             <button
               onClick={handleAddSticky}
               className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
@@ -213,12 +231,12 @@ function Board() {
             >
               🗑 Delete
             </button>
-            <button
+            {/* <button
               onClick={handleGroupSelection}
               className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
             >
               Group Selection
-            </button>
+            </button> */}
           </div>
 
           {/* Shape Controls */}
