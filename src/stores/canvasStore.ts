@@ -14,7 +14,10 @@ type RFState = {
   addGroup: (pos: XYPosition) => void;
   groupSelectionIntoFrame: () => void;
   deleteSelected: () => void;
-  ui: { showResizers: boolean; allowStretch: boolean };
+  ui: {
+    showResizers: boolean;
+    allowStretch: boolean;
+  };
   setUI: (patch: Partial<RFState["ui"]>) => void;
 
   edgeOpts: {

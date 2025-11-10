@@ -163,30 +163,34 @@ function Board() {
     [setEdges]
   );
 
-  const onAddTenK = useCallback(() => {
-    generateLargeGraph(10000);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, rf]);
-
-  const onAddFiveK = useCallback(() => {
-    generateLargeGraph(5000);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, rf]);
-
-  const onAddOneK = useCallback(() => {
-    generateLargeGraph(1000);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, rf]);
-
-  const onAddFiveHundred = useCallback(() => {
-    generateLargeGraph(500);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, rf]);
-
   const onResetCanvas = useCallback(() => {
     resetCanvas();
     requestAnimationFrame(() => rf.setViewport({ x: 0, y: 0, zoom: 1 }));
   }, [resetCanvas, rf]);
+
+  const onAddTenK = useCallback(() => {
+    onResetCanvas();
+    generateLargeGraph(10000);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, onResetCanvas, rf]);
+
+  const onAddFiveK = useCallback(() => {
+    onResetCanvas();
+    generateLargeGraph(5000);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, onResetCanvas, rf]);
+
+  const onAddOneK = useCallback(() => {
+    onResetCanvas();
+    generateLargeGraph(1000);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, onResetCanvas, rf]);
+
+  const onAddFiveHundred = useCallback(() => {
+    onResetCanvas();
+    generateLargeGraph(500);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, onResetCanvas, rf]);
 
   useEffect(() => {
     const isEditing = () => {
@@ -415,6 +419,12 @@ function Board() {
       </div>
 
       <ReactFlow
+        nodesDraggable={true}
+        nodesConnectable={true}
+        elementsSelectable={true}
+        panOnDrag={true}
+        zoomOnScroll
+        onlyRenderVisibleElements
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodesChange}

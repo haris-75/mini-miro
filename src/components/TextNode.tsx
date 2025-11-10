@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { memo, useCallback, useRef } from "react";
 import { NodeResizer } from "@reactflow/node-resizer";
 import "@reactflow/node-resizer/dist/style.css";
 import { useRFStore } from "../stores/canvasStore";
@@ -6,7 +6,7 @@ import { useRFStore } from "../stores/canvasStore";
 type TextData = { text: string };
 type P = { id: string; data: TextData; selected?: boolean };
 
-export default function TextNode({ id, data, selected }: P) {
+function TextNode({ id, data, selected }: P) {
   const setNodes = useRFStore((s) => s.setNodes);
   const showResizers = useRFStore((s) => s.ui.showResizers);
   const divRef = useRef<HTMLDivElement | null>(null);
@@ -69,3 +69,8 @@ export default function TextNode({ id, data, selected }: P) {
     </div>
   );
 }
+
+export default memo(
+  TextNode,
+  (a, b) => a.selected === b.selected && a.data === b.data
+);

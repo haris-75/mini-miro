@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, memo } from "react";
 import { Handle, Position, useUpdateNodeInternals } from "reactflow";
 import { NodeResizer } from "@reactflow/node-resizer";
 import "@reactflow/node-resizer/dist/style.css";
@@ -13,11 +13,7 @@ type ShapeData = {
 
 type CustomNodeProps<T> = { id: string; data: T; selected?: boolean };
 
-export default function ShapeNode({
-  id,
-  data,
-  selected,
-}: CustomNodeProps<ShapeData>) {
+function ShapeNode({ id, data, selected }: CustomNodeProps<ShapeData>) {
   const boxRef = useRef<HTMLDivElement | null>(null);
   const updateNodeInternals = useUpdateNodeInternals();
   const setNodes = useRFStore((s) => s.setNodes);
@@ -92,3 +88,8 @@ export default function ShapeNode({
     </div>
   );
 }
+
+export default memo(
+  ShapeNode,
+  (a, b) => a.selected === b.selected && a.data === b.data
+);

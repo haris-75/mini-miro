@@ -1,4 +1,4 @@
-import { useRef, useCallback, useLayoutEffect } from "react";
+import { useRef, useCallback, useLayoutEffect, memo } from "react";
 import { Handle, Position, useUpdateNodeInternals } from "reactflow";
 import { NodeResizer } from "@reactflow/node-resizer";
 import { useRFStore } from "../stores/canvasStore";
@@ -11,11 +11,7 @@ type CustomNodeProps<T> = {
   isConnectable?: boolean;
 };
 
-export default function StickyNode({
-  id,
-  data,
-  selected,
-}: CustomNodeProps<StickyData>) {
+function StickyNode({ id, data, selected }: CustomNodeProps<StickyData>) {
   const updateNodeInternals = useUpdateNodeInternals();
   const setNodes = useRFStore((s) => s.setNodes);
   const showResizers = useRFStore((s) => s.ui.showResizers);
@@ -106,3 +102,8 @@ export default function StickyNode({
     </div>
   );
 }
+
+export default memo(
+  StickyNode,
+  (a, b) => a.selected === b.selected && a.data === b.data
+);
