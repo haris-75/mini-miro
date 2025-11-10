@@ -45,6 +45,8 @@ function Board() {
     deleteSelected,
     ui,
     setUI,
+    generateLargeGraph,
+    resetCanvas,
   } = useRFStore();
   const rf = useReactFlow();
   const onFit = useCallback(
@@ -161,6 +163,31 @@ function Board() {
     [setEdges]
   );
 
+  const onAddTenK = useCallback(() => {
+    generateLargeGraph(10000);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, rf]);
+
+  const onAddFiveK = useCallback(() => {
+    generateLargeGraph(5000);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, rf]);
+
+  const onAddOneK = useCallback(() => {
+    generateLargeGraph(1000);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, rf]);
+
+  const onAddFiveHundred = useCallback(() => {
+    generateLargeGraph(500);
+    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+  }, [generateLargeGraph, rf]);
+
+  const onResetCanvas = useCallback(() => {
+    resetCanvas();
+    requestAnimationFrame(() => rf.setViewport({ x: 0, y: 0, zoom: 1 }));
+  }, [resetCanvas, rf]);
+
   useEffect(() => {
     const isEditing = () => {
       const el = document.activeElement as HTMLElement | null;
@@ -195,6 +222,30 @@ function Board() {
         <div className="flex flex-wrap gap-2">
           {/* Action Buttons */}
           <div className="flex gap-2 pb-2 border-b border-gray-700 w-full">
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              onClick={onAddTenK}
+            >
+              + 10k graph
+            </button>
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              onClick={onAddFiveK}
+            >
+              + 5k graph
+            </button>
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              onClick={onAddOneK}
+            >
+              + 1k graph
+            </button>
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              onClick={onAddFiveHundred}
+            >
+              + 500 graph
+            </button>
             <button
               className="px-4 py-2 bg-gradient-to-r from-blue-400 to-blue-800 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
               onClick={onFit}
@@ -237,6 +288,12 @@ function Board() {
             >
               Group Selection
             </button> */}
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-red-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              onClick={onResetCanvas}
+            >
+              + Reset Canvas
+            </button>
           </div>
 
           {/* Shape Controls */}

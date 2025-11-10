@@ -36,25 +36,13 @@ type RFState = {
   onConnect: (conn: Connection) => void;
   setNodes: (updater: (nds: Node[]) => Node[]) => void;
   setEdges: (updater: (eds: Edge[]) => Edge[]) => void;
+  generateLargeGraph: (count: number) => void;
+  resetCanvas: () => void;
 };
 
 export const useRFStore = create<RFState>()(
   persist(
     (set, get) => ({
-      deleteSelected: () =>
-        set((s) => {
-          const toDelete = new Set(
-            s.nodes.filter((n) => n.selected).map((n) => n.id)
-          );
-          if (toDelete.size === 0) return {};
-          return {
-            nodes: s.nodes.filter((n) => !toDelete.has(n.id)),
-            edges: s.edges.filter(
-              (e) => !toDelete.has(e.source) && !toDelete.has(e.target)
-            ),
-          };
-        }),
-
       nodes: [],
       edges: [],
       nextId: 1,
@@ -154,6 +142,20 @@ export const useRFStore = create<RFState>()(
           nextId: s.nextId + 1,
         })),
 
+      deleteSelected: () =>
+        set((s) => {
+          const toDelete = new Set(
+            s.nodes.filter((n) => n.selected).map((n) => n.id)
+          );
+          if (toDelete.size === 0) return {};
+          return {
+            nodes: s.nodes.filter((n) => !toDelete.has(n.id)),
+            edges: s.edges.filter(
+              (e) => !toDelete.has(e.source) && !toDelete.has(e.target)
+            ),
+          };
+        }),
+
       groupSelectionIntoFrame: () =>
         set((s) => {
           const selected = s.nodes.filter((n) => n.selected);
@@ -238,6 +240,102 @@ export const useRFStore = create<RFState>()(
 
       setNodes: (updater) => set((s) => ({ nodes: updater(s.nodes) })),
       setEdges: (updater) => set((s) => ({ edges: updater(s.edges) })),
+      generateLargeGraph: (count: number) =>
+        set((s) => {
+          const kinds: ShapeKind[] = ["rectangle", "circle", "diamond"];
+          const o = get().edgeOpts;
+
+          const startId = s.nextId;
+          const nodes: Node[] = new Array(count);
+          const edges: Edge[] = new Array(Math.max(0, count - 1));
+
+          const cols = 100; // 100 x 100 = 10k
+          const gx = 200;
+          const gy = 140;
+
+          for (let i = 0; i < count; i++) {
+            const id = String(startId + i);
+            const row = Math.floor(i / cols);
+            const col = i % cols;
+
+            // rotate through: shape → sticky → text
+            const t =
+              i % 3 === 0 ? "shape" : i % 3 === 1 ? "sticky" : "textNode";
+
+            if (t === "shape") {
+              const kind = kinds[(i / 3) % kinds.length | 0];
+              const w = kind === "rectangle" ? 160 : 120;
+              const h = kind === "rectangle" ? 120 : 120;
+              nodes[i] = {
+                id,
+                type: "shape",
+                position: { x: col * gx, y: row * gy },
+                data: {
+                  kind,
+                  fill: i % 2 ? "#bfdbfe" : "#fde68a",
+                  stroke: "#1e3a8a",
+                  strokeWidth: 2,
+                },
+                style: {
+                  width: w,
+                  height: h,
+                  border: "none",
+                  padding: 0,
+                  background: "transparent",
+                },
+              };
+            } else if (t === "sticky") {
+              nodes[i] = {
+                id,
+                type: "sticky",
+                position: { x: col * gx, y: row * gy },
+                data: { text: `Note ${id}` },
+                style: { width: 180, height: 120 },
+              };
+            } else {
+              // textNode
+              nodes[i] = {
+                id,
+                type: "textNode",
+                position: { x: col * gx, y: row * gy },
+                data: { text: `Title ${id}` },
+                style: {
+                  width: 220,
+                  height: 56,
+                  background: "transparent",
+                  padding: 0,
+                },
+              };
+            }
+
+            if (i > 0) {
+              const prev = String(startId + i - 1);
+              edges[i - 1] = {
+                id: `e${prev}-${id}`,
+                source: prev,
+                target: id,
+                type: o.type,
+                label: o.label || undefined,
+                markerEnd: o.arrow
+                  ? { type: MarkerType.ArrowClosed }
+                  : undefined,
+                style: o.dashed ? { strokeDasharray: "6 4" } : undefined,
+              };
+            }
+          }
+
+          return {
+            nodes: [...s.nodes, ...nodes],
+            edges: [...s.edges, ...edges],
+            nextId: startId + count,
+          };
+        }),
+      resetCanvas: () =>
+        set(() => ({
+          nodes: [],
+          edges: [],
+          nextId: 1,
+        })),
     }),
     {
       name: "rf:canvas:v1",
