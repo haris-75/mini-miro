@@ -16,8 +16,9 @@ import StickyNode from "./StickyNode";
 import ShapeNode from "./ShapeNode";
 import TextNode from "./TextNode";
 import GroupNode from "./GroupNode";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isEdgeType, isShapeKind } from "../utils";
+import { useChunkedGraphGenerator } from "../hooks/useChunkedGraphGenerator";
 
 const nodeTypes = {
   sticky: StickyNode,
@@ -27,6 +28,7 @@ const nodeTypes = {
 };
 
 function Board() {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     addNode,
     addShape,
@@ -45,7 +47,6 @@ function Board() {
     deleteSelected,
     ui,
     setUI,
-    generateLargeGraph,
     resetCanvas,
   } = useRFStore();
   const rf = useReactFlow();
@@ -168,29 +169,35 @@ function Board() {
     requestAnimationFrame(() => rf.setViewport({ x: 0, y: 0, zoom: 1 }));
   }, [resetCanvas, rf]);
 
-  const onAddTenK = useCallback(() => {
-    onResetCanvas();
-    generateLargeGraph(10000);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, onResetCanvas, rf]);
+  const { start, cancel, progress } = useChunkedGraphGenerator({
+    onDone: () => requestAnimationFrame(() => rf.fitView({ padding: 0.1 })),
+    chunkSize: 300,
+    cols: 100,
+  });
 
-  const onAddFiveK = useCallback(() => {
-    onResetCanvas();
-    generateLargeGraph(5000);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, onResetCanvas, rf]);
+  const addNodes = useCallback(
+    (count: number) => {
+      setIsLoading(true);
+      onResetCanvas();
+      start(count);
+      requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
+      setIsLoading(false);
+    },
+    [start, onResetCanvas, rf]
+  );
 
-  const onAddOneK = useCallback(() => {
-    onResetCanvas();
-    generateLargeGraph(1000);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, onResetCanvas, rf]);
-
-  const onAddFiveHundred = useCallback(() => {
-    onResetCanvas();
-    generateLargeGraph(500);
-    requestAnimationFrame(() => rf.fitView({ padding: 0.1 }));
-  }, [generateLargeGraph, onResetCanvas, rf]);
+  const {
+    onAddTenK,
+    // onAddFiveK, onAddOneK, onAddFiveHundred
+  } = useMemo(
+    () => ({
+      onAddTenK: () => addNodes(10000),
+      onAddFiveK: () => addNodes(5000),
+      onAddOneK: () => addNodes(1000),
+      onAddFiveHundred: () => addNodes(500),
+    }),
+    [addNodes]
+  );
 
   useEffect(() => {
     const isEditing = () => {
@@ -226,13 +233,37 @@ function Board() {
         <div className="flex flex-wrap gap-2">
           {/* Action Buttons */}
           <div className="flex gap-2 pb-2 border-b border-gray-700 w-full">
+            {progress.running ? (
+              <div className="flex items-center gap-3 w-1/4">
+                <div className="flex-1">
+                  <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-500 to-pink-600 transition-all duration-300 rounded-full"
+                      style={{
+                        width: `${(progress.done / progress.total) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+                <span className="text-sm font-medium text-gray-700 min-w-[60px]">
+                  {progress.done}/{progress.total}
+                </span>
+                <button
+                  onClick={cancel}
+                  className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : null}
+
             <button
               className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
               onClick={onAddTenK}
             >
               + 10k graph
             </button>
-            <button
+            {/* <button
               className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
               onClick={onAddFiveK}
             >
@@ -249,7 +280,7 @@ function Board() {
               onClick={onAddFiveHundred}
             >
               + 500 graph
-            </button>
+            </button> */}
             <button
               className="px-4 py-2 bg-gradient-to-r from-blue-400 to-blue-800 text-white rounded-lg font-medium hover:shadow-md transition-all hover:scale-105 active:scale-95"
               onClick={onFit}
@@ -418,25 +449,29 @@ function Board() {
         </div>
       </div>
 
-      <ReactFlow
-        nodesDraggable={true}
-        nodesConnectable={true}
-        elementsSelectable={true}
-        panOnDrag={true}
-        zoomOnScroll
-        onlyRenderVisibleElements
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={handleNodesChange}
-        onEdgesChange={handleEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        fitView
-        defaultEdgeOptions={{ interactionWidth: 24 }}
-      >
-        <Background />
-        <Controls />
-      </ReactFlow>
+      {isLoading ? (
+        "Loading..."
+      ) : (
+        <ReactFlow
+          nodesDraggable={true}
+          nodesConnectable={true}
+          elementsSelectable={true}
+          panOnDrag={true}
+          zoomOnScroll
+          onlyRenderVisibleElements
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={handleNodesChange}
+          onEdgesChange={handleEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView
+          defaultEdgeOptions={{ interactionWidth: 24 }}
+        >
+          <Background />
+          <Controls />
+        </ReactFlow>
+      )}
     </>
   );
 }
